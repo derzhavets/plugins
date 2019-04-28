@@ -35,6 +35,8 @@
     } else {
       result(@(batteryLevel));
     }
+  } else if ([@"getBatteryState" isEqualToString:call.method]) {
+      [self sendBatteryState:result];
   } else {
     result(FlutterMethodNotImplemented);
   }
@@ -42,6 +44,25 @@
 
 - (void)onBatteryStateDidChange:(NSNotification*)notification {
   [self sendBatteryStateEvent];
+}
+
+-(void)sendBatteryState:(FlutterResult)result {
+    UIDeviceBatteryState state = [[UIDevice currentDevice] batteryState];
+    switch (state) {
+        case UIDeviceBatteryStateFull:
+            result(@"full");
+        case UIDeviceBatteryStateCharging:
+            result(@"charging");
+            break;
+        case UIDeviceBatteryStateUnplugged:
+            result(@"discharging");
+            break;
+        default:
+            result([FlutterError errorWithCode:@"UNAVAILABLE"
+                                           message:@"Charging status unavailable"
+                                           details:nil]);
+            break;
+    }
 }
 
 - (void)sendBatteryStateEvent {

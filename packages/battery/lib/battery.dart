@@ -36,6 +36,11 @@ class Battery {
       .invokeMethod<int>('getBatteryLevel')
       .then<int>((dynamic result) => result);
 
+  /// Returns the current battery state.
+  Future<BatteryState> get batteryState => _methodChannel
+      .invokeMethod<String>('getBatteryState')
+      .then<BatteryState>((dynamic result) => _parseBatteryState(result));
+
   /// Fires whenever the battery state changes.
   Stream<BatteryState> get onBatteryStateChanged {
     if (_onBatteryStateChanged == null) {
