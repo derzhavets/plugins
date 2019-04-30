@@ -52,6 +52,8 @@ public class BatteryPlugin implements MethodCallHandler, StreamHandler {
       } else {
         result.error("UNAVAILABLE", "Battery level not available.", null);
       }
+    } else if (call.method.equals("getBatteryState")) {
+      getBatteryState(result);
     } else {
       result.notImplemented();
     }
@@ -89,6 +91,26 @@ public class BatteryPlugin implements MethodCallHandler, StreamHandler {
     }
 
     return batteryLevel;
+  }
+
+  private void getBatteryState(Result result) {
+    IntentFilter ifilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
+    Intent batteryStatus = registrar.context().registerReceiver(null, ifilter);
+    int status = batteryStatus.getIntExtra(BatteryManager.EXTRA_STATUS, -1);
+    switch (status) {
+      case BatteryManager.BATTERY_STATUS_CHARGING:
+        result.success("charging");
+        break;
+      case BatteryManager.BATTERY_STATUS_FULL:
+        result.success("full");
+        break;
+      case BatteryManager.BATTERY_STATUS_DISCHARGING:
+        result.success("discharging");
+        break;
+      default:
+        result.error("UNAVAILABLE", "Charging status unavailable", null);
+        break;
+    }
   }
 
   private BroadcastReceiver createChargingStateChangeReceiver(final EventSink events) {
